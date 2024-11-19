@@ -1,10 +1,8 @@
-// Assuming you're using Unity as your development environment and C# as your scripting language, below is an implementation for the power slider and the ball throwing mechanic.
-
 using UnityEngine;
-using UnityEngine.UI;  // Assuming you will use a UI slider to represent the power level
+using UnityEngine.UI; 
 using System.Collections; // Needed for IEnumerator
 
-public class HoTossGame : MonoBehaviour
+public class HotossGame : MonoBehaviour
 {
     [Header("UI Elements")]
     public Slider powerSlider; // Slider to indicate charge power
@@ -26,10 +24,28 @@ public class HoTossGame : MonoBehaviour
     private float randomMaxChargeTime;
     private bool isCharging = false;
     private bool isIncreasing = true;
+    private bool isAimingCompleted = false; // Keeps track of whether aiming is finished
+    
+    void Start()
+    {
+        isAimingCompleted = false; // Ensure aiming must finish before power slider activates
+        powerSlider.gameObject.SetActive(false); // Hide power slider initially
+    }
+
+
+    public void SetAimingCompleted()
+    {
+        Debug.Log("Aiming Completed - Power Slider Activated");
+        isAimingCompleted = true;
+        powerSlider.gameObject.SetActive(true); // Show the power slider
+    }
 
     void Update()
     {
-        HandlePowerSlider();
+        if (isAimingCompleted)
+        {
+            HandlePowerSlider();
+        }
     }
 
     void HandlePowerSlider()
@@ -162,29 +178,3 @@ public class HoTossGame : MonoBehaviour
         }
     }
 } 
-
-/*
-Explanation:
-1. **Power Slider**:
-   - A UI slider (`powerSlider`) is used to visually represent the charging progress. 
-   - `isCharging` tracks whether the player is currently charging the throw. The left mouse button (M1) controls this.
-   - The `currentChargeTime` increments over time, giving the slider its value based on how long M1 is held.
-   - `randomMaxChargeTime` is randomized every time the player starts charging, providing a different maximum charge time for each throw.
-   - The slider value oscillates between 0 and `randomMaxChargeTime` to challenge the player to time their shot.
-   - On releasing M1, the power is calculated as a ratio of the `randomMaxChargeTime` to determine throw power.
-
-2. **Ball Throw Mechanic**:
-   - When the power is finalized, a new ball object (`ballPrefab`) is instantiated at the player's position.
-   - The ball is given a force proportional to the charging level (`chargeRatio * maxThrowForce`).
-   - A random skew is applied in `CalculateThrowDirection` using `Random.Range()`.
-   - The skew factor gives the ball a randomized slight curve to the left or right, as per your requested feature.
-
-3. **Slider Color Change**:
-   - The color of the `sliderFillImage` changes dynamically based on the current charge level (`chargeRatio`).
-   - It starts from green at low charge, transitions to yellow at mid charge, and finally to red at high charge to indicate increasing power.
-
-4. **Camera FOV Adjustment**:
-   - The main camera's field of view (`FOV`) is adjusted based on the current charge level (`chargeRatio`).
-   - The FOV starts at a minimum value (`minFOV`) when the charge is low and increases to a maximum value (`maxFOV`) as the charge increases, creating a zoom effect.
-   - After throwing the ball, the FOV is reset to the minimum value (`minFOV`) gradually to maintain a smooth transition.
-*/
