@@ -1,100 +1,46 @@
 using UnityEngine;
-using UnityEngine.UI;
-using System.Collections.Generic;
 
 public class AimingSystem : MonoBehaviour
 {
-    [Header("Aiming Settings")]
-    public HotossGame hotossGame;   // set by GameController or via Inspector
     public Camera mainCamera;
-    public Transform aimIndicator; // The visual indicator for aiming
-    public float maxAimingDistance = 10f;
-    public LayerMask aimLayerMask; // Mask to determine which layers can be aimed at
-    public LineRenderer trajectoryLine; // Line renderer to show trajectory
+    public Transform throwStart;           // assign ThrowPosition
+    public Transform aimIndicator;         // small sphere
+    public LineRenderer trajectoryLine;    // 2-point line
+    public LayerMask aimMask = ~0;         // hit any collider by default
+    public float maxDistance = 200f;
 
-    private Vector3 targetPosition;
-    private bool isAiming = true;
+    public Vector3 CurrentTarget { get; private set; }
 
-    void Start()
+    private readonly Vector3[] _line = new Vector3[2];
+
+    private void Update()
     {
-        // Ensure the line renderer is disabled at start
-        if (trajectoryLine != null)
-        {
-            trajectoryLine.enabled = false;
-        }
-    }
-
-    void Update()
-    {
-        if (isAiming)
-        {
-            HandleAimingInput();
-        }
-    }
-
-    void HandleAimingInput()
-    {
-        // Handle player input for aiming (e.g., using the mouse or controller)
-        if (Input.GetMouseButton(1)) // Right mouse button to aim
+        if (Input.GetMouseButton(0))
         {
             Ray ray = mainCamera.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-
-            if (Physics.Raycast(ray, out hit, maxAimingDistance, aimLayerMask))
+            if (Physics.Raycast(ray, out var hit, maxDistance, aimMask))
             {
-                targetPosition = hit.point;
-                UpdateAimIndicator(targetPosition);
-                DrawTrajectoryLine(targetPosition);
+                CurrentTarget = hit.point;
+
+                if (aimIndicator != null) aimIndicator.position = CurrentTarget;
+
+                if (trajectoryLine != null && throwStart != null)
+                {
+                    _line[0] = throwStart.position;
+                    _line[1] = CurrentTarget;
+                    trajectoryLine.SetPositions(_line);
+                    if (!trajectoryLine.enabled) trajectoryLine.enabled = true;
+                }
             }
         }
-
-        // Confirm the aimed position with left mouse button click
-        if (Input.GetMouseButtonDown(0)) // Left mouse button to confirm
+        else
         {
-            isAiming = false;
-            DisableTrajectoryLine();
-            // Here you can notify another script to start the power slider mechanic
+            if (trajectoryLine != null && trajectoryLine.enabled) trajectoryLine.enabled = false;
         }
     }
 
-    void UpdateAimIndicator(Vector3 position)
+    public void ClearVisuals()
     {
-        // Update the position of the aim indicator to show where the player is aiming
-        if (aimIndicator != null)
-        {
-            aimIndicator.position = position;
-        }
-    }
-
-    void DrawTrajectoryLine(Vector3 targetPosition)
-    {
-        if (trajectoryLine != null && !trajectoryLine.enabled)
-            trajectoryLine.enabled = true;
-
-        if (trajectoryLine != null)
-        {
-            Vector3 start = (hotossGame != null && hotossGame.throwPosition != null)
-                            ? hotossGame.throwPosition.position
-                            : transform.position;  // fallback if not wired
-
-            Vector3[] positions = new Vector3[2];
-            positions[0] = start;
-            positions[1] = targetPosition;
-            trajectoryLine.SetPositions(positions);
-        }
-    }
-
-
-    void DisableTrajectoryLine()
-    {
-        if (trajectoryLine != null)
-        {
-            trajectoryLine.enabled = false;
-        }
-    }
-
-    public Vector3 GetTargetPosition()
-    {
-        return targetPosition;
+        if (trajectoryLine != null) trajectoryLine.enabled = false;
     }
 }

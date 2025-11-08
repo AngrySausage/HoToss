@@ -1,180 +1,86 @@
 using UnityEngine;
-using UnityEngine.UI; 
-using System.Collections; // Needed for IEnumerator
+using UnityEngine.UI;
 
 public class HotossGame : MonoBehaviour
 {
-    [Header("UI Elements")]
-    public Slider powerSlider; // Slider to indicate charge power
-    public Image sliderFillImage; // The fill area of the slider to change color dynamically
+    [Header("Scene")]
+    public Transform throwPosition;      // ThrowPosition object
+    public GameObject ballPrefab;        // must have Rigidbody
+    public AimingSystem aiming;          // reference the AimingSystem
 
-    [Header("Ball Settings")]
-    public GameObject ballPrefab;
-    public Transform throwPosition;
-    public float maxThrowForce = 20f;
-    public float minChargeTime = 0.25f;
-    public float maxChargeTime = 1f;
+    [Header("UI")]
+    public Slider powerSlider;           // set Min 0, Max 1
+    public Image sliderFillImage;        // optional, can be null
 
-    [Header("Camera Settings")]
-    public Camera mainCamera; // Main camera to adjust FOV
-    public float minFOV = 90f;
-    public float maxFOV = 60f;
+    [Header("Tuning")]
+    public float chargeSpeed = 1.5f;     // how fast the slider ping-pongs
+    public float maxThrowForce = 25f;    // impulse at slider value 1
+    public float minThrowForce = 5f;     // impulse at slider value 0
 
-    private float currentChargeTime = 0f;
-    private float randomMaxChargeTime;
-    private bool isCharging = false;
-    private bool isIncreasing = true;
-    private bool isAimingCompleted = false; // Keeps track of whether aiming is finished
-    
-    void Start()
+    private bool _charging;
+    private float _t;                    // time driver for PingPong
+    private float _charge;               // 0..1
+
+    private void Start()
     {
-        isAimingCompleted = false; // Ensure aiming must finish before power slider activates
-        powerSlider.gameObject.SetActive(false); // Hide power slider initially
-    }
-
-
-    public void SetAimingCompleted()
-    {
-        Debug.Log("Aiming Completed - Power Slider Activated");
-        isAimingCompleted = true;
-        powerSlider.gameObject.SetActive(true); // Show the power slider
-    }
-
-    void Update()
-    {
-        if (isAimingCompleted)
+        if (powerSlider != null)
         {
-            HandlePowerSlider();
+            powerSlider.minValue = 0f;
+            powerSlider.maxValue = 1f;
+            powerSlider.value = 0f;
+            powerSlider.gameObject.SetActive(false);
         }
     }
 
-    void HandlePowerSlider()
+    private void Update()
     {
-        // Start charging when left mouse button is pressed
+        // start charging
         if (Input.GetMouseButtonDown(0))
         {
-            isCharging = true;
-            currentChargeTime = 0f;
-            randomMaxChargeTime = Mathf.Pow(Random.value, 1.5f) * (maxChargeTime - minChargeTime) + minChargeTime; // Randomize max charge time each throw
-            powerSlider.value = 0f;
-            isIncreasing = true;
+            _charging = true;
+            _t = 0f;
+            if (powerSlider != null) powerSlider.gameObject.SetActive(true);
         }
 
-        // Continue charging while left mouse button is held
-        if (isCharging && Input.GetMouseButton(0))
+        // update charge and slider while held
+        if (_charging && Input.GetMouseButton(0))
         {
-            if (isIncreasing)
+            _t += Time.deltaTime * chargeSpeed;
+            _charge = Mathf.PingPong(_t, 1f);          // cycles up and down
+            if (powerSlider != null) powerSlider.value = _charge;
+
+            // simple optional colour cue
+            if (sliderFillImage != null)
             {
-                currentChargeTime += Time.deltaTime;
-                if (currentChargeTime >= randomMaxChargeTime)
-                {
-                    currentChargeTime = randomMaxChargeTime;
-                    isIncreasing = false;
-                }
+                // green to red through yellow
+                sliderFillImage.color = Color.Lerp(Color.green, Color.red, _charge);
             }
-            else
-            {
-                currentChargeTime -= Time.deltaTime;
-                if (currentChargeTime <= 0f)
-                {
-                    currentChargeTime = 0f;
-                    isIncreasing = true;
-                }
-            }
-
-            float chargeRatio = Mathf.Clamp01(currentChargeTime / randomMaxChargeTime);
-            powerSlider.value = chargeRatio;
-            UpdateSliderColor(chargeRatio);
-            UpdateCameraFOV(chargeRatio);
         }
 
-        // Throw the ball when the left mouse button is released
-        if (isCharging && Input.GetMouseButtonUp(0))
+        // release to throw
+        if (_charging && Input.GetMouseButtonUp(0))
         {
-            isCharging = false;
-            float finalPower = Mathf.Clamp01(currentChargeTime / randomMaxChargeTime);
-            StartCoroutine(ThrowBallWithDelay(finalPower));
-            // StartCoroutine(ResetCameraFOV());
+            _charging = false;
+            if (powerSlider != null) powerSlider.gameObject.SetActive(false);
+            ThrowBall();
+            if (aiming != null) aiming.ClearVisuals();
         }
     }
 
-    void ThrowBall(float chargeRatio)
+    private void ThrowBall()
     {
-        GameObject newBall = Instantiate(ballPrefab, throwPosition.position, throwPosition.rotation);
-        Rigidbody ballRb = newBall.GetComponent<Rigidbody>();
-        if (ballRb != null)
+        if (ballPrefab == null || throwPosition == null) return;
+
+        Vector3 target = (aiming != null) ? aiming.CurrentTarget : throwPosition.position + transform.forward;
+        Vector3 dir = target - throwPosition.position;
+        if (dir.sqrMagnitude < 1e-6f) dir = transform.forward;
+
+        float force = Mathf.Lerp(minThrowForce, maxThrowForce, _charge);
+
+        GameObject ball = Instantiate(ballPrefab, throwPosition.position, Quaternion.identity);
+        if (ball.TryGetComponent<Rigidbody>(out var rb))
         {
-            float throwForce = chargeRatio * maxThrowForce;
-            Vector3 throwDirection = CalculateThrowDirection();
-            ballRb.AddForce(throwDirection * throwForce, ForceMode.Impulse);
-            powerSlider.value = 0;
-        StartCoroutine(ResetCameraFOV());
+            rb.AddForce(dir.normalized * force, ForceMode.Impulse);
         }
     }
-
-    IEnumerator ThrowBallWithDelay(float chargeRatio)
-    {
-        // Wait for a short delay before throwing the ball
-        yield return new WaitForSeconds(0.2f); // Adjust the delay duration as needed
-        ThrowBall(chargeRatio);
-    }
-
-    Vector3 CalculateThrowDirection()
-    {
-        // Basic direction towards where the player is aiming
-        Vector3 baseDirection = throwPosition.forward;
-        
-        // Random skewing depending on the power level
-        float skewFactor = Random.Range(-0.1f, 0.1f); // Adjust this range for randomness
-        Vector3 skewDirection = new Vector3(skewFactor, 0, 1).normalized;
-        
-        return (baseDirection + skewDirection).normalized;
-    }
-
-    void UpdateSliderColor(float chargeRatio)
-    {
-        // Change slider color from green (low charge) to yellow (mid charge) to red (high charge)
-        Color lowColor = Color.green;
-        Color midColor = Color.yellow;
-        Color highColor = Color.red;
-
-        if (chargeRatio < 0.5f)
-        {
-            // Interpolate between green and yellow
-            sliderFillImage.color = Color.Lerp(lowColor, midColor, chargeRatio * 2f);
-        }
-        else
-        {
-            // Interpolate between yellow and red
-            sliderFillImage.color = Color.Lerp(midColor, highColor, (chargeRatio - 0.5f) * 2f);
-        }
-    }
-
-    void UpdateCameraFOV(float chargeRatio)
-    {
-        // Adjust the camera's field of view (FOV) based on the charge level
-        if (mainCamera != null)
-        {
-            mainCamera.fieldOfView = Mathf.Lerp(minFOV, maxFOV, chargeRatio);
-        }
-    }
-
-    IEnumerator ResetCameraFOV()
-    {
-        // Gradually reset the camera's FOV to the minimum value
-        if (mainCamera != null)
-        {
-            float currentFOV = mainCamera.fieldOfView;
-            float duration = 0.1f; // Time over which FOV resets
-            float elapsedTime = 0f;
-
-            while (elapsedTime < duration)
-            {
-                elapsedTime += Time.deltaTime;
-                mainCamera.fieldOfView = Mathf.Lerp(currentFOV, minFOV, elapsedTime / duration);
-                yield return null;
-            }
-            mainCamera.fieldOfView = minFOV;
-        }
-    }
-} 
+}

@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 public class GameController : MonoBehaviour
 {
-    // Public on purpose so you can wire in the Inspector without attributes.
+    // Drag these in the Inspector
     public AimingSystem aimingSystem;
     public HotossGame hotossGame;
 
@@ -17,22 +17,21 @@ public class GameController : MonoBehaviour
 
     private void Awake()
     {
-        // Wire HotossGame references if they are not already set in the Inspector
+        // Wire HotossGame
         if (hotossGame != null)
         {
             if (hotossGame.throwPosition == null)   hotossGame.throwPosition = throwPosition;
-            if (hotossGame.mainCamera == null)      hotossGame.mainCamera = mainCamera;
             if (hotossGame.powerSlider == null)     hotossGame.powerSlider = powerSlider;
             if (hotossGame.sliderFillImage == null) hotossGame.sliderFillImage = powerFillImage;
         }
 
-        // Wire AimingSystem references if they are not already set
+        // Wire AimingSystem
         if (aimingSystem != null)
         {
             if (aimingSystem.mainCamera == null)      aimingSystem.mainCamera = mainCamera;
-            if (aimingSystem.aimIndicator == null)     aimingSystem.aimIndicator = aimIndicator;
-            if (aimingSystem.trajectoryLine == null)   aimingSystem.trajectoryLine = trajectoryLine;
-            if (aimingSystem.hotossGame == null)       aimingSystem.hotossGame = hotossGame;
+            if (aimingSystem.throwStart == null)      aimingSystem.throwStart = throwPosition;
+            if (aimingSystem.aimIndicator == null)    aimingSystem.aimIndicator = aimIndicator;
+            if (aimingSystem.trajectoryLine == null)  aimingSystem.trajectoryLine = trajectoryLine;
         }
     }
 }
