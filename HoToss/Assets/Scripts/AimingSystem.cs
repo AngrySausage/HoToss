@@ -5,6 +5,7 @@ using System.Collections.Generic;
 public class AimingSystem : MonoBehaviour
 {
     [Header("Aiming Settings")]
+    public HotossGame hotossGame;   // set by GameController or via Inspector
     public Camera mainCamera;
     public Transform aimIndicator; // The visual indicator for aiming
     public float maxAimingDistance = 10f;
@@ -67,21 +68,22 @@ public class AimingSystem : MonoBehaviour
 
     void DrawTrajectoryLine(Vector3 targetPosition)
     {
-        // Enable the line renderer if not already enabled
         if (trajectoryLine != null && !trajectoryLine.enabled)
-        {
             trajectoryLine.enabled = true;
-        }
 
-        // Set the trajectory line points from the throw position to the target position
         if (trajectoryLine != null)
         {
+            Vector3 start = (hotossGame != null && hotossGame.throwPosition != null)
+                            ? hotossGame.throwPosition.position
+                            : transform.position;  // fallback if not wired
+
             Vector3[] positions = new Vector3[2];
-            positions[0] = transform.position; // Start of the line (where the player is aiming from)
-            positions[1] = targetPosition; // End of the line (aimed point)
+            positions[0] = start;
+            positions[1] = targetPosition;
             trajectoryLine.SetPositions(positions);
         }
     }
+
 
     void DisableTrajectoryLine()
     {
@@ -96,22 +98,3 @@ public class AimingSystem : MonoBehaviour
         return targetPosition;
     }
 }
-
-/*
-Explanation:
-1. **Aiming System**:
-   - The `AimingSystem` script allows the player to aim before the throw.
-   - The right mouse button (`Input.GetMouseButton(1)`) is used to control the aiming process.
-   - A ray is cast from the camera to the mouse position to determine the aimed point on a valid layer (`aimLayerMask`).
-
-2. **Trajectory Line**:
-   - A `LineRenderer` component (`trajectoryLine`) is used to visually show the dotted trajectory from the throw position to the aimed target.
-   - The `DrawTrajectoryLine()` method sets up the line to move with the mouse until the player confirms the aiming position.
-   - The trajectory line is disabled once the player clicks the left mouse button (`Input.GetMouseButtonDown(0)`).
-
-3. **Aim Indicator**:
-   - The `aimIndicator` represents the target visually and moves to the aiming point.
-
-4. **Confirmation of Aim**:
-   - Once the left mouse button is clicked, the player confirms the aimed target, and the script transitions to the next phase, which could be the power slider mechanic.
-*/
