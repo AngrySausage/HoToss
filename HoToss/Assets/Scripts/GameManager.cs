@@ -5,8 +5,6 @@ using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     [Header("UI Panels")]
-    public GameObject mainMenuPanel;
-    public GameObject controlsPanel;
     public GameObject winPanel;
 
     [Header("Game UI Elements")]
@@ -21,8 +19,6 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         // Initial state: show main menu, hide other UI panels
-        mainMenuPanel.SetActive(true);
-        controlsPanel.SetActive(false);
         winPanel.SetActive(false);
         // Ensure game UI (counter and slider) is hidden or inactive at start
         if (canCounterText != null)
@@ -44,8 +40,6 @@ public class GameManager : MonoBehaviour
     public void StartGame()
     {
         // Hide main menu and controls panels, show game UI
-        mainMenuPanel.SetActive(false);
-        controlsPanel.SetActive(false);
         winPanel.SetActive(false);
         if (canCounterText != null)
         {
@@ -65,15 +59,7 @@ public class GameManager : MonoBehaviour
     // Call this when the Controls button is pressed
     public void ShowControls()
     {
-        controlsPanel.SetActive(true);
-        mainMenuPanel.SetActive(false);
-    }
-
-    // Call this for returning from the Controls screen to Main Menu
-    public void HideControls()
-    {
-        controlsPanel.SetActive(false);
-        mainMenuPanel.SetActive(true);
+        SceneManager.LoadScene("Controls");
     }
 
     // This is called from DeathZone script when a can falls
@@ -111,8 +97,7 @@ public class GameManager : MonoBehaviour
     // Call this when "Return to Main Menu" button is pressed on win screen (or Back from controls, if you want to reuse it)
     public void ReturnToMainMenu()
     {
-        // Reload the scene to reset everything to initial state
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        SceneManager.LoadScene("MainMenu");
     }
 
     // Call this when Exit button is pressed

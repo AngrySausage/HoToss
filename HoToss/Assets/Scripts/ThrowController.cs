@@ -21,7 +21,7 @@ public class ThrowController : MonoBehaviour
 
     // Internal state
     private bool isCharging = false;
-    private float chargeTime = 0f;  // Accumulated time for current charge cycle
+    private float chargeTime = 0f;  // Accumulated time for current chAarge cycle
 
     void Start()
     {
