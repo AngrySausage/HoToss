@@ -132,23 +132,23 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 38009300750994863, guid: 272f0bbdc4e38a1428f3b2c3ff8cb4fd, type: 3}
       propertyPath: m_Layer
-      value: 3
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 279323606216288722, guid: 272f0bbdc4e38a1428f3b2c3ff8cb4fd, type: 3}
       propertyPath: m_Layer
-      value: 3
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 296082226591816764, guid: 272f0bbdc4e38a1428f3b2c3ff8cb4fd, type: 3}
       propertyPath: m_Layer
-      value: 3
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 811216971504311301, guid: 272f0bbdc4e38a1428f3b2c3ff8cb4fd, type: 3}
       propertyPath: m_Layer
-      value: 3
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1326790787858991876, guid: 272f0bbdc4e38a1428f3b2c3ff8cb4fd, type: 3}
       propertyPath: m_Layer
-      value: 3
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1629338369899588674, guid: 272f0bbdc4e38a1428f3b2c3ff8cb4fd, type: 3}
       propertyPath: m_LocalPosition.x
@@ -160,15 +160,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2717562205092856385, guid: 272f0bbdc4e38a1428f3b2c3ff8cb4fd, type: 3}
       propertyPath: m_Layer
-      value: 3
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3765471552419107181, guid: 272f0bbdc4e38a1428f3b2c3ff8cb4fd, type: 3}
       propertyPath: m_Layer
-      value: 3
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4704983751280482819, guid: 272f0bbdc4e38a1428f3b2c3ff8cb4fd, type: 3}
       propertyPath: m_Layer
-      value: 3
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4947843967033241594, guid: 272f0bbdc4e38a1428f3b2c3ff8cb4fd, type: 3}
       propertyPath: m_RootOrder
@@ -216,23 +216,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5032660148325026704, guid: 272f0bbdc4e38a1428f3b2c3ff8cb4fd, type: 3}
       propertyPath: m_Layer
-      value: 3
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5093795115208945645, guid: 272f0bbdc4e38a1428f3b2c3ff8cb4fd, type: 3}
       propertyPath: m_Layer
-      value: 3
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5625723217689270842, guid: 272f0bbdc4e38a1428f3b2c3ff8cb4fd, type: 3}
       propertyPath: m_Layer
-      value: 3
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6285096319331175739, guid: 272f0bbdc4e38a1428f3b2c3ff8cb4fd, type: 3}
       propertyPath: m_Layer
-      value: 3
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8147350999884273490, guid: 272f0bbdc4e38a1428f3b2c3ff8cb4fd, type: 3}
       propertyPath: m_Layer
-      value: 3
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 272f0bbdc4e38a1428f3b2c3ff8cb4fd, type: 3}
@@ -456,7 +456,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   winPanel: {fileID: 1673775809}
   canCounterText: {fileID: 1881026574}
-  chargeSlider: {fileID: 0}
+  canTag: Can
+  totalCansExpected: 6
 --- !u!1 &820684284
 GameObject:
   m_ObjectHideFlags: 0
@@ -907,6 +908,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1637696268}
   - component: {fileID: 1637696267}
+  - component: {fileID: 1637696269}
   m_Layer: 0
   m_Name: DeathZone
   m_TagString: Untagged
@@ -935,13 +937,26 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1637696266}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -32.299988, y: 3.9, z: -3.1299996}
-  m_LocalScale: {x: 60, y: 0.01, z: 45.496002}
+  m_LocalPosition: {x: -32.9, y: -0.81, z: 1.7}
+  m_LocalScale: {x: 60, y: 3.79, z: 45.496002}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1637696269
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1637696266}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e246b4f1fef172647a1036f4a905bdd9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  canTag: Can
 --- !u!1 &1655984108
 GameObject:
   m_ObjectHideFlags: 0

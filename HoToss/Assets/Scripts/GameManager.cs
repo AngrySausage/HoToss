@@ -1,110 +1,73 @@
+using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI; // or TMP if you use TextMeshPro
 
 public class GameManager : MonoBehaviour
 {
-    [Header("UI Panels")]
-    public GameObject winPanel;
+    [Header("UI")]
+    [SerializeField] private GameObject winPanel;          // Your existing "You Win!" panel in GameScene
+    [SerializeField] private Text canCounterText;          // If using TextMeshPro, change type and update code accordingly
 
-    [Header("Game UI Elements")]
-    public Text canCounterText;      // UI text for "Cans Knocked Down: x/6"
-    public GameObject chargeSlider;  // The charge slider object (for enabling/disabling during pause if needed)
+    [Header("Cans")]
+    [SerializeField] private string canTag = "Can";
+    [SerializeField] private int totalCansExpected = 6;    // Fallback; will be auto-counted at runtime
 
-    private int cansKnockedDown = 0;
-    private int totalCans = 6;  // total number of cans in the level (default 6)
+    private int totalCans;
+    private int knockedDown;
+    private readonly HashSet<int> countedInstanceIds = new HashSet<int>();
 
-    private bool gameIsActive = false;  // tracks if the gameplay is currently active (not in a menu)
-
-    void Start()
+    private void Awake()
     {
-        // Initial state: show main menu, hide other UI panels
-        winPanel.SetActive(false);
-        // Ensure game UI (counter and slider) is hidden or inactive at start
-        if (canCounterText != null)
-            canCounterText.gameObject.SetActive(false);
-        if (chargeSlider != null)
-            chargeSlider.SetActive(false);
+        // Auto-detect total cans present at runtime by tag
+        var cans = GameObject.FindGameObjectsWithTag(canTag);
+        totalCans = cans.Length > 0 ? cans.Length : totalCansExpected;
 
-        // Count total cans dynamically (optional): find all objects tagged "Can"
-        GameObject[] allCans = GameObject.FindGameObjectsWithTag("Can");
-        if (allCans.Length > 0)
-        {
-            totalCans = allCans.Length;
-        }
-        // Initialize the counter text
-        UpdateCanCounterUI();
+        knockedDown = 0;
+        countedInstanceIds.Clear();
+
+        if (winPanel != null) winPanel.SetActive(false);
+        UpdateCounterUI();
     }
 
-    // Call this when the Play button is pressed
-    public void StartGame()
+    public void OnCanEnteredDeathZone(GameObject can)
     {
-        // Hide main menu and controls panels, show game UI
-        winPanel.SetActive(false);
-        if (canCounterText != null)
-        {
-            canCounterText.gameObject.SetActive(true);
-        }
-        if (chargeSlider != null)
-        {
-            chargeSlider.SetActive(true); // though the ThrowController will control its visibility
-        }
-        // Reset game state values
-        cansKnockedDown = 0;
-        UpdateCanCounterUI();
-        gameIsActive = true;
-        // (If we had paused time, resume it. We did not pause time here, so nothing else needed)
-    }
+        if (can == null) return;
 
-    // Call this when the Controls button is pressed
-    public void ShowControls()
-    {
-        SceneManager.LoadScene("Controls");
-    }
+        int id = can.GetInstanceID();
+        if (countedInstanceIds.Contains(id)) return; // already counted this specific instance
 
-    // This is called from DeathZone script when a can falls
-    public void OnCanKnockedDown()
-    {
-        if (!gameIsActive) return;  // only count if game is active
-        cansKnockedDown++;
-        UpdateCanCounterUI();
-        // Check win condition
-        if (cansKnockedDown >= totalCans)
+        countedInstanceIds.Add(id);
+        knockedDown++;
+        UpdateCounterUI();
+
+        // Optional: despawn the can so it cannot be re-counted by other triggers
+        Destroy(can);
+
+        if (knockedDown >= totalCans)
         {
-            WinGame();
+            HandleWin();
         }
     }
 
-    // Update the UI text for the can counter
-    private void UpdateCanCounterUI()
+    private void UpdateCounterUI()
     {
         if (canCounterText != null)
         {
-            canCounterText.text = $"Cans Knocked Down: {cansKnockedDown}/{totalCans}";
+            canCounterText.text = $"Cans Knocked Down: {knockedDown}/{totalCans}";
         }
     }
 
-    // Called when all cans are knocked down
-    private void WinGame()
+    private void HandleWin()
     {
-        gameIsActive = false;
-        // Show the win screen
-        winPanel.SetActive(true);
-        // Optionally, pause the game (stop physics and input)
-        // Time.timeScale = 0f; // (if you want to freeze everything on win)
+        if (winPanel != null) winPanel.SetActive(true);
+        // Optionally pause physics:
+        // Time.timeScale = 0f;
     }
 
-    // Call this when "Return to Main Menu" button is pressed on win screen (or Back from controls, if you want to reuse it)
+    // If your Win panel has "Return to Main Menu" button wired to this:
     public void ReturnToMainMenu()
     {
         SceneManager.LoadScene("MainMenu");
-    }
-
-    // Call this when Exit button is pressed
-    public void ExitGame()
-    {
-        Application.Quit();
-        // Note: This will have no effect in the Unity editor, but will work in a build.
-        // You can use UnityEditor.EditorApplication.isPlaying = false; to stop the editor play mode if testing, but it's optional.
     }
 }
