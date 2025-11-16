@@ -154,6 +154,14 @@ PrefabInstance:
       propertyPath: m_LocalPosition.x
       value: 1.25
       objectReference: {fileID: 0}
+    - target: {fileID: 1761527378761598996, guid: 272f0bbdc4e38a1428f3b2c3ff8cb4fd, type: 3}
+      propertyPath: m_Convex
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1761527378761598996, guid: 272f0bbdc4e38a1428f3b2c3ff8cb4fd, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2717562205092856385, guid: 272f0bbdc4e38a1428f3b2c3ff8cb4fd, type: 3}
       propertyPath: m_Name
       value: StackedCans
@@ -937,8 +945,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1637696266}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -32.9, y: -0.81, z: 1.7}
-  m_LocalScale: {x: 60, y: 3.79, z: 45.496002}
+  m_LocalPosition: {x: -32.9, y: 4.28, z: 1.7}
+  m_LocalScale: {x: 60, y: 0.22, z: 45.496002}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}

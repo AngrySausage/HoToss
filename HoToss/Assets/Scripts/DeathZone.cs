@@ -10,23 +10,38 @@ public class DeathZone : MonoBehaviour
     {
         var col = GetComponent<Collider>();
         col.isTrigger = true; // enforce trigger at runtime
-        gm = FindObjectOfType<GameManager>();
+        CacheGameManager();
         if (gm == null)
         {
-            Debug.LogError("GameManager not found in scene. Please add one.");
+            Debug.LogError("GameManager not found in scene. Please add one.", this);
         }
     }
 
     private void OnTriggerEnter(Collider other)
     {
-        if (!other || !other.gameObject) return;
+        if (other == null) return;
 
-        if (other.CompareTag(canTag))
+        GameObject canObject = other.attachedRigidbody != null
+            ? other.attachedRigidbody.gameObject
+            : other.gameObject;
+
+        if (canObject != null && canObject.CompareTag(canTag))
         {
-            if (gm != null)
+            if (gm == null)
             {
-                gm.OnCanEnteredDeathZone(other.gameObject);
+                CacheGameManager();
+                if (gm == null) return;
             }
+
+            gm.OnCanEnteredDeathZone(canObject);
+        }
+    }
+
+    private void CacheGameManager()
+    {
+        if (gm == null)
+        {
+            gm = FindObjectOfType<GameManager>();
         }
     }
 }

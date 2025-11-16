@@ -21,7 +21,16 @@ public class GameManager : MonoBehaviour
     {
         // Auto-detect total cans present at runtime by tag
         var cans = GameObject.FindGameObjectsWithTag(canTag);
-        totalCans = cans.Length > 0 ? cans.Length : totalCansExpected;
+        int physicalCans = 0;
+        foreach (var can in cans)
+        {
+            if (can != null && can.GetComponent<Rigidbody>() != null)
+            {
+                physicalCans++;
+            }
+        }
+
+        totalCans = physicalCans > 0 ? physicalCans : totalCansExpected;
 
         knockedDown = 0;
         countedInstanceIds.Clear();
